@@ -41,3 +41,7 @@ build/
 .DS_Store
 
 .class
+
+# Desconsiderar arquivos ao executar projeto java
+*.lock
+*.bin
