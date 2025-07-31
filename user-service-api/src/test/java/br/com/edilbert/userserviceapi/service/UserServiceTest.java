@@ -3,6 +3,7 @@ package br.com.edilbert.userserviceapi.service;
 import br.com.edilbert.userserviceapi.entity.User;
 import br.com.edilbert.userserviceapi.mapper.UserMapper;
 import br.com.edilbert.userserviceapi.repository.UserRepository;
+import models.exceptions.ResourceNotFoundException;
 import models.responses.UserResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,20 @@ class UserServiceTest {
         verify(repository, times(1)).findById("1");
         verify(mapper, times(1)).fromEntity(any(User.class));
 
+    }
+
+    @Test
+    void whenCallFindByIdTWithInvalidIdThenThrowResourceNotFoundException() {
+        when(repository.findById(anyString())).thenReturn(Optional.empty());
+        try {
+            userService.findById("1");
+        } catch (Exception e) {
+            assertEquals(ResourceNotFoundException.class, e.getClass());
+            assertEquals("Object not found. Id: 1, type: " + UserResponse.class.getSimpleName(), e.getMessage());
+        }
+
+        verify(repository, times(1)).findById(anyString());
+        verify(mapper, times(0)).fromEntity(any(User.class));
     }
 
 
