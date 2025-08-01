@@ -66,7 +66,7 @@ public class UserService {
         repository.findByEmail(email)
                 .filter(user -> !user.getId().equals(id))
                 .ifPresent(user -> {
-                    throw new DataIntegrityViolationException("Email " + email + " already exists");
+                    throw new DataIntegrityViolationException("Email [ " + email + " ] already exists");
                 });
     }
 
