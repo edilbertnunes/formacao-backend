@@ -10,6 +10,7 @@ import models.enums.ProfileEnum;
 
 import java.util.Set;
 
+@With
 public record CreateUserRequest (
         @Schema(description = "User name", example = "Edilbert Nunes")
         @NotBlank(message = "Name cannot be empty")
