@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static br.com.edilbert.userserviceapi.creator.CreatorUtils.generateMock;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -55,6 +57,22 @@ class UserControllerImplTest {
                 .andExpect(jsonPath("$.status").value(NOT_FOUND.value()))
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
 
+    }
+
+    @Test
+    void testFindAllWithSuccess() throws Exception {
+
+        final var entity1 = generateMock(User.class);
+        final var entity2 = generateMock(User.class);
+
+        mockMvc.perform(get("/api/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0]").isNotEmpty())
+                .andExpect(jsonPath("$[1]").isNotEmpty())
+                .andExpect(jsonPath("$[0].profiles").isArray());
+
+        userRepository.deleteAll(List.of(entity1, entity2));
     }
 
 }
