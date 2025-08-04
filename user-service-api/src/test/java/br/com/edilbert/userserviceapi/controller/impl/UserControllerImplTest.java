@@ -14,8 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static br.com.edilbert.userserviceapi.creator.CreatorUtils.generateMock;
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,6 +28,9 @@ class UserControllerImplTest {
 
     public static final String BASE_URI = "/api/users";
     public static final String VALID_EMAIL = "kj45klj23b5@mail.com";
+    public static final String VALIDATION_EXCEPTION_MSG = "Validation Exception";
+    public static final String VALIDATION_ATTRIBUTES_ERROR_MSG = "Exception in validation attributes";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -115,6 +117,24 @@ class UserControllerImplTest {
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
 
         userRepository.deleteById(entity.getId());
+    }
+
+    @Test
+    void testSaveUserWithNameEmptyThenThrowBadRequest() throws Exception{
+        final var request = generateMock(CreateUserRequest.class).withName("").withEmail(VALID_EMAIL);
+
+        mockMvc.perform(
+                        post(BASE_URI)
+                                .contentType(APPLICATION_JSON)
+                                .content(toJson(request))
+                ).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(VALIDATION_ATTRIBUTES_ERROR_MSG))
+                .andExpect(jsonPath("$.error").value(VALIDATION_EXCEPTION_MSG))
+                .andExpect(jsonPath("$.path").value(BASE_URI))
+                .andExpect(jsonPath("$.status").value(BAD_REQUEST.value()))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty())
+                .andExpect(jsonPath("$.errors[?(@.field=='name' && @.message=='Name must contain between 3 and 50 characters')]").exists())
+                .andExpect(jsonPath("$.errors[?(@.field=='name' && @.message=='Name cannot be empty')]").exists());
     }
 
     private String toJson(final Object object) throws Exception {
